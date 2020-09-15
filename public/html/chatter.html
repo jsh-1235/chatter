@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatter</title>
+    <!-- <script src="https://code.jquery.com/jquery-3.5.1.js"
+        integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script> -->
+
+    <script src="/jquery/dist/jquery.min.js"></script>
+
+    <style>
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            $('#form').submit(function (event) {
+                $.post('chatter/messages', $(this).serialize());
+
+                event.preventDefault();
+            });
+
+            function clear() {
+                const output = document.getElementById("output");
+
+                while (output.lastElementChild) {
+                    output.removeChild(output.lastElementChild);
+                }
+
+                //$('#output').empty;
+            }
+
+            setInterval(function () {
+                $.getJSON('chatter/messages', {
+                    dummy: new Date().getTime()
+                }, function (data) {
+                    clear();
+
+                    $.each(data, function (index, item) {
+                        console.log(data);
+
+                        var output = '';
+                        output += '<h3>' + new Date().getTime() + '</h3>';
+                        output += '<h2>' + item.name + '</h2>';
+                        output += '<p>' + item.content + '</p>';
+
+                        $('<div></div>').html(output).prependTo('#output');
+                    });
+                });
+            }, 1000);
+        });
+    </script>
+</head>
+
+<body>
+    <form id="form">
+        <table>
+            <tr>
+                <td>Name</td>
+                <td><input type="text" name="name" /></td>
+            </tr>
+            <tr>
+                <td>Message</td>
+                <td><textarea name="content"></textarea></td>
+            </tr>
+        </table>
+        <input type="submit" value="Writing" />
+    </form>
+    <hr />
+    <div id="output"></div>
+</body>
+
+</html>

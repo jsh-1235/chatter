@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Socket Client 2</title>
+    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css">
+    <link rel='stylesheet' href='/stylesheets/style.css'>
+
+    <script src="/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script(src="bootstrap-4.5.2-dist /js/bootstrap.bundle.min.js">
+    </script>
+
+        <script>
+            var ws;
+
+            if ("WebSocket" in window) {
+                var ws = new WebSocket("ws://localhost:50000");
+
+                ws.onopen = function () {
+                    ws.send("클라이언트가 연결 되었습니다.");
+                }
+
+                ws.onmessage = function (event) {
+
+                    var message = event.data;
+
+                    document.getElementById("result").innerHTML = message;
+                }
+
+                ws.onclose = function () {
+                    alert("Websocket is closed.")
+                }
+
+                ws.onerror = function (error) {
+                    alert("error : " + event.data);
+                }
+            } else {
+                alert("웹 소켓이 지원되지 않습니다.");
+            }
+
+            function send() {
+                ws.send(document.getElementById("data").value);
+            }
+
+            function quit() {
+                ws.close();
+            }
+        </script>
+</head>
+
+<body class="container">
+    <div class="input-group m-1">
+        <input class="form-control" type="text" id="data" />
+        <button class="btn btn-outline-primary" onclick="send()">Send</button>
+        <button class="btn btn-outline-secondary" onclick="quit()">Quit</button>
+    </div>
+    <hr />
+    <output id="result"></output>
+</body>
+
+</html>

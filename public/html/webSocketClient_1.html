@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Socket Client 1</title>
+    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css">
+    <link rel='stylesheet' href='/stylesheets/style.css'>
+
+    <script src="/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script(src="bootstrap-4.5.2-dist /js/bootstrap.bundle.min.js">
+    </script>
+</head>
+
+<body class="container">
+    <div class="input-group m-1">
+        <input class="form-control" type="text" id="address" />
+
+        <input class="btn btn-outline-secondary" type=" button" id="open" value="open" />
+    </div>
+    <br />
+
+    <div class="input-group m-1">
+        <input class="form-control" type="text" id="data" />
+
+        <input class="btn btn-outline-secondary" type=" button" id="send" value="send" />
+    </div>
+    <br />
+
+    <output id="result"></output>
+
+    <script>
+        var ws;
+
+        document.getElementById('open').onclick = function () {
+            var address = document.getElementById('address').value;
+
+            // 웹소켓 전역 객체 생성
+
+            //var ws = new WebSocket("ws://bt-actb.scm.azurewebsites.net:3000");
+
+            ws = new WebSocket(address);
+
+            // 연결이 수립되면 서버에 메시지를 전송한다
+            ws.onopen = function (event) {
+                ws.send("클라이언트가 연결 되었습니다.");
+            }
+
+            // 서버로 부터 메시지를 수신한다
+            ws.onmessage = function (event) {
+
+                var message = event.data;
+
+                document.getElementById("result").innerHTML = message;
+            }
+
+            ws.onclose = function () {
+                alert("Websocket is closed.")
+            }
+
+            ws.onerror = function (error) {
+                alert("error : " + event.data);
+            }
+        }
+
+        document.getElementById('send').onclick = function () {
+            var message = document.getElementById('data').value;
+
+            ws.send(message);
+        };
+    </script>
+</body>
+
+</html>

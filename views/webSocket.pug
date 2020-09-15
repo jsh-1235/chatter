@@ -1,0 +1,14 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  hr
+  a(class="m-3" href="/html/webSocketClient_1.html") Web Socket Client 1  
+  a(class="m-3" href="/html/webSocketClient_2.html") Web Socket Client 2
+
+  block script
+    script.    
+      $(document).ready(function () {
+        //- alert("#{title}");      
+      });

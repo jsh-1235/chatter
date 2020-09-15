@@ -1,0 +1,183 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('chatting:server');
+var http = require('http');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '4000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+//==============================================================================
+// Socket.io
+//==============================================================================
+var io = require('socket.io').listen(server);
+
+var id = 0;
+
+var list = [];
+
+io.sockets.on('connection', function (socket) {
+  id = socket.id
+
+  //==================================================
+  // public 통신
+  //==================================================  
+  socket.on('public', function (data) {
+    console.log("public");
+
+    io.sockets.emit('updateMessage', data);
+  });
+
+  //==================================================
+  // Broadcast 통신
+  // 자기 자신을 제외한 모든 사용자에게 이벤트 전달
+  //==================================================  
+  socket.on('broadcast', function (data) {
+    console.log("broadcast");
+
+    socket.broadcast.emit('updateMessage', data);
+  });
+
+  //==================================================
+  // Private 통신  
+  //==================================================  
+  socket.on('private', function (data) {
+    console.log("private");
+
+    io.sockets.sockets[id].emit('updateMessage', data);
+  });
+
+  //==================================================
+  // Private 통신  
+  //==================================================  
+  socket.on('setname', function (data) {
+    console.log("setname");
+
+    socket.username = data.username;
+
+    console.log(socket.username);
+  });
+
+  socket.on('getname', function (data) {
+    console.log("getname");
+
+    console.log(socket.username);
+
+    socket.emit('updateUserName', socket.username);
+  });
+
+  //===================================================================
+  // socket.join() : 클라이언트를 방에 집어넣는다.
+  // io.sockets.in() : 특정 방에 있는 클라이언트를 추출한다.  
+  //===================================================================  
+  socket.on('join', function (data) {
+    console.log("join");
+
+    socket.join(data);
+
+    socket.room = data;
+
+    console.log(socket.room);
+  });
+
+  socket.on('message', function (data) {
+    console.log("message");
+
+    console.log(socket.room + " : " + data);
+
+    var result = { room: socket.room, message: data };
+
+    list.push(result);
+
+    io.sockets.in(socket.room).emit('message', list);
+  });
+
+  console.log('socket.io is connected. [' + id + "]");
+});
+
+//=========================================================================
+const webSocketServer = require('../public/javascripts/webSocketServer.js');
+
+webSocketServer(server);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
